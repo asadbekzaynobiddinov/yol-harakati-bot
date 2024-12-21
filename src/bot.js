@@ -1,13 +1,13 @@
 import { Bot, session } from "grammy";
 import { config } from "dotenv";
 
-import { testCommand, startCommand } from "./commands/bot.commands.js";
+import { questions20, startCommand } from "./commands/bot.commands.js";
 import { ticketsKey } from "./keyboards/index.js";
 import { callbackQuery } from "./commands/inline.commannnds.js";
 
 config();
 
-const token = process.env.TOKEN 
+const token = process.env.TOKEN
 
 const bot = new Bot(token)
 
@@ -16,7 +16,7 @@ bot.use(
     initial: () => ({
       page: 1,
       limit: 10,
-      currestQuestionId : 0
+      currentQuestionId: 0
     }),
   })
 );
@@ -31,6 +31,10 @@ bot.on('callback_query:data', async (ctx) => {
 
 bot.hears('Biletlar 🎟', async (ctx) => {
   ticketsKey(ctx)
+})
+
+bot.hears("Imtihon 20 👨🏼‍💻", async (ctx) => {
+  await questions20(ctx)
 })
 
 

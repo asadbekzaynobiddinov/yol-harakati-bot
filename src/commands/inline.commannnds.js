@@ -38,8 +38,8 @@ export const callbackQuery = async (ctx) => {
       const page = +param
       const skip = (page - 1) * 10
       ctx.session.questions = await Question.find().skip(skip).limit(10)
-      ctx.session.currestQuestionId = 0
-      await sendQuestion(ctx, ctx.session.questions[ctx.session.currestQuestionId])
+      ctx.session.currentQuestionId = 0
+      await sendQuestion(ctx, ctx.session.questions[ctx.session.currentQuestionId])
       break;
 
 
@@ -50,7 +50,7 @@ export const callbackQuery = async (ctx) => {
 
       if (!ctx.session.startTime) {
         ctx.session.startTime = Date.now();
-        ctx.session.correctAnswers = 0; 
+        ctx.session.correctAnswers = 0;
         ctx.session.incorrectAnswers = 0;
       }
 
@@ -59,6 +59,7 @@ export const callbackQuery = async (ctx) => {
         ctx.session.correctAnswers++
         message =
           `✅ Javob to'g'ri\n` +
+          `👮🏻‍♂️ Yodda tuting \n` + 
           `${currentQuestion.description}`
         await ctx.reply(message)
       } else {
@@ -68,13 +69,10 @@ export const callbackQuery = async (ctx) => {
           `${currentQuestion.description}`
         )
       }
-      ctx.session.currestQuestionId += 1
-      await sendQuestion(ctx, ctx.session.questions[ctx.session.currestQuestionId])
+      ctx.session.currentQuestionId += 1
+      await sendQuestion(ctx, ctx.session.questions[ctx.session.currentQuestionId])
       break;
     default:
       break;
   }
-
-
-
 }
