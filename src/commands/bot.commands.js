@@ -14,8 +14,8 @@ export const startCommand = async (ctx) => {
     console.log(`Foydalanuvchi ma'lumotlari: ID: ${id}, Username: ${user}`);
 
     const chatMember = await ctx.api.getChatMember(channelUsername, id);
-
-    if (chatMember.status !== 'member') {
+    console.log(chatMember.status)
+    if (chatMember.status == 'left') {
       await ctx.reply(`Botdan to'liq foydalanish uchun avval quyidagi kanalga a'zo bo'ling`, { reply_markup: keyboard });
       return;
     }
