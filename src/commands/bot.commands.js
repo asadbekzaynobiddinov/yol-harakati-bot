@@ -1,26 +1,48 @@
+import { InlineKeyboard } from "grammy";
 import { sendQuestion } from "../handlers/questions.handler.js";
 import { mainMenuKeys } from "../keyboards/index.js";
 import { Question, User } from "../schema/index.js";
 
 export const startCommand = async (ctx) => {
   try {
-    await ctx.reply(`
-     "Assalomu alaykum!👋"\n\n` +
-      `"Haydovchilik guvohnomasini olishga yordam beruvchi botga xush kelibsiz! 🚗\n\n` +
-      `Bu yerda siz yo'l harakati qoidalari va imtihon savollari bo'yicha mashq qilishingiz mumkin.\n\n` +
-      `Mashqlarni bajaring, bilimlaringizni mustahkamlang va haydovchilik guvohnomasini olishga tayyorlaning! 🚦\n` +
-      `Xavfsiz haydovchi bo'ling! 😊"`)
-    const { id, first_name, last_name, username } = ctx.from
-    await mainMenuKeys(ctx)
-    const currentUser = await User.find({ id })
-    if (currentUser.length == 0) {
-      const newUser = new User({ id, first_name, last_name, username })
-      await newUser.save()
-    } 
-  }catch (error) {
-      console.log(error.message)
+    const channelUsername = '@fulstack_dev';
+    const { id, username, first_name, last_name } = ctx.from;
+
+    const keyboard = new InlineKeyboard().url('Kanalga qo\'shilish', `https://t.me/+rdEyAn6RqTNlY2Fi`);
+
+    const user = username || first_name || last_name || 'Foydalanuvchi';
+    console.log(`Foydalanuvchi ma'lumotlari: ID: ${id}, Username: ${user}`);
+
+    const chatMember = await ctx.api.getChatMember(channelUsername, id);
+
+    if (chatMember.status !== 'member') {
+      await ctx.reply(`Botdan to'liq foydalanish uchun avval quyidagi kanalga a'zo bo'ling`, { reply_markup: keyboard });
+      return;
     }
-}
+
+    const currentUser = await User.find({ id });
+    if (currentUser.length === 0) {
+      const newUser = new User({
+        id,
+        first_name: first_name || `Ismi noma'lum`,
+        last_name: last_name || `Familyasi noma'lum`,
+        username: username || `Username yo'q`,
+      });
+      await newUser.save();
+    }
+
+    await ctx.reply(`
+      "Assalomu alaykum!👋"\n\n` +
+       `"Haydovchilik guvohnomasini olishga yordam beruvchi botga xush kelibsiz! 🚗\n\n` +
+       `Bu yerda siz yo'l harakati qoidalari va imtihon savollari bo'yicha mashq qilishingiz mumkin.\n\n` +
+       `Mashqlarni bajaring, bilimlaringizni mustahkamlang va haydovchilik guvohnomasini olishga tayyorlaning! 🚦\n` +
+       `Xavfsiz haydovchi bo'ling! 😊"`)
+     await mainMenuKeys(ctx)
+
+  } catch (error) {
+    console.error(error.message);
+  }
+};
 
 
 export const questions20 = async (ctx) => {

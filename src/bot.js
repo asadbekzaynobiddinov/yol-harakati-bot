@@ -69,7 +69,7 @@ bot.hears('Biletlar 🎟', async (ctx) => {
 
 bot.hears("Imtihon 20 👨🏼‍💻", async (ctx) => {
   try {
-    if (ctx.session.questions.length) {
+    if (ctx.session.questions) {
       return await ctx.reply("Sizda tugallanmagan test mavjud !\nTugatish uchun /stop buyrug'ini bering !")
     }
     await ctx.reply('Savollar yuklanmoqda... ⏳')
