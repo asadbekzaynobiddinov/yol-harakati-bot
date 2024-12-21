@@ -4,7 +4,8 @@ import { config } from "dotenv";
 import { questions20, startCommand, questions10 } from "./commands/bot.commands.js";
 import { mainMenuKeys, ticketsKey } from "./keyboards/index.js";
 import { callbackQuery } from "./commands/inline.commannnds.js";
-import { sendQuestion } from "./handlers/questions.handler.js";
+import { sendQuestion, sendRandomQuestion } from "./handlers/questions.handler.js";
+import { Question } from "./schema/test.schema.js";
 
 config();
 
@@ -19,7 +20,8 @@ bot.use(
       limit: 10,
       currentQuestionId: 0,
       startTime: null,
-      lastMessageId: null
+      lastMessageId: null,
+      inRandom: false
     }),
   })
 );
@@ -39,12 +41,19 @@ bot.command('start', async (ctx) => {
 
 bot.command('stop', async (ctx) => {
   try {
+    if (ctx.session.inRandom) {
+      ctx.session.inRandom = false
+      ctx.session.questions = null
+      ctx.session.currentQuestionId = 0
+      await sendRandomQuestion(ctx, null)
+      return null
+    }
+    if (!ctx.session.questions) {
+      return await ctx.reply(`Sizda hozirda faol testlar yoq`)
+    }
     ctx.session.questions = null
     ctx.session.currentQuestionId = 0
-    ctx.session.correctAnswers = 0
-    ctx.session.incorrectAnswers = 0
-    await ctx.api.deleteMessage(ctx.from.id, ctx.message.message_id - 1)
-    return mainMenuKeys(ctx)
+    await sendQuestion(ctx, null)
   } catch (error) {
     console.log(error.message)
   }
@@ -60,7 +69,7 @@ bot.hears('Biletlar 🎟', async (ctx) => {
 
 bot.hears("Imtihon 20 👨🏼‍💻", async (ctx) => {
   try {
-    if (ctx.session.questions) {
+    if (ctx.session.questions.length) {
       return await ctx.reply("Sizda tugallanmagan test mavjud !\nTugatish uchun /stop buyrug'ini bering !")
     }
     await ctx.reply('Savollar yuklanmoqda... ⏳')
@@ -84,5 +93,15 @@ bot.hears("Imtihon 10 👨🏼‍💻", async (ctx) => {
   }
 })
 
+bot.hears('Random Savollar 🎲', async (ctx) => {
+  try {
+    ctx.session.inRandom = true
+    const randomNumber = Math.floor(Math.random() * 700) + 1;
+    const question = await Question.findOne({ id: randomNumber })
+    await sendRandomQuestion(ctx, question)
+  } catch (error) {
+
+  }
+})
 
 export default bot

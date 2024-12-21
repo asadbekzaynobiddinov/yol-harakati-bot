@@ -1,4 +1,4 @@
-import { sendQuestion } from "../handlers/questions.handler.js";
+import { sendQuestion, sendRandomQuestion } from "../handlers/questions.handler.js";
 import { ticketsKey } from "../keyboards/index.js";
 import { Question } from "../schema/test.schema.js";
 
@@ -56,38 +56,76 @@ export const callbackQuery = async (ctx) => {
 
 
     case 'answer':
-     try {
-       await ctx.editMessageReplyMarkup()
-       const id = +param
-       const currentQuestion = await Question.findOne({ id })
- 
-       if (!ctx.session.startTime) {
-         ctx.session.startTime = Date.now();
-         ctx.session.correctAnswers = 0;
-         ctx.session.incorrectAnswers = 0;
-       }
- 
-       let message
-       if (currentQuestion.choices[choiseId].answer) {
-         ctx.session.correctAnswers++
-         message =
-           `✅ Javob to'g'ri\n` +
-           `👮🏻‍♂️ Yodda tuting \n` + 
-           `${currentQuestion.description}`
-         await ctx.reply(message)
-       } else {
-         ctx.session.incorrectAnswers++
-         await ctx.reply(
-           `❌ Javob xato\n` +
-           `${currentQuestion.description}`
-         )
-       }
-       ctx.session.currentQuestionId += 1
-       await sendQuestion(ctx, ctx.session.questions[ctx.session.currentQuestionId])
-       break;
-     } catch (error) {
-      console.log(error.message)
-     }
+      try {
+        await ctx.editMessageReplyMarkup()
+        const id = +param
+        const currentQuestion = await Question.findOne({ id })
+
+        if (!ctx.session.startTime) {
+          ctx.session.startTime = Date.now();
+          ctx.session.correctAnswers = 0;
+          ctx.session.incorrectAnswers = 0;
+        }
+
+        let message
+        if (currentQuestion.choices[choiseId].answer) {
+          ctx.session.correctAnswers++
+          message =
+            `✅ Javob to'g'ri\n` +
+            `👮🏻‍♂️ Yodda tuting \n` +
+            `${currentQuestion.description}`
+          await ctx.reply(message)
+        } else {
+          ctx.session.incorrectAnswers++
+          await ctx.reply(
+            `❌ Javob xato\n` +
+            `${currentQuestion.description}`
+          )
+        }
+        ctx.session.currentQuestionId += 1
+        await sendQuestion(ctx, ctx.session.questions[ctx.session.currentQuestionId])
+      } catch (error) {
+        console.log(error.message)
+      }
+      break;
+
+
+    case 'random':
+      try {
+        await ctx.editMessageReplyMarkup()
+        const id = +param
+        const currentQuestion = await Question.findOne({ id })
+
+        if (!ctx.session.startTime) {
+          ctx.session.startTime = Date.now();
+          ctx.session.correctAnswers = 0;
+          ctx.session.incorrectAnswers = 0;
+        }
+
+        let message
+        if (currentQuestion.choices[choiseId].answer) {
+          ctx.session.correctAnswers++
+          message =
+            `✅ Javob to'g'ri\n` +
+            `👮🏻‍♂️ Yodda tuting \n` +
+            `${currentQuestion.description}`
+          await ctx.reply(message)
+        } else {
+          ctx.session.incorrectAnswers++
+          await ctx.reply(
+            `❌ Javob xato\n` +
+            `${currentQuestion.description}`
+          )
+        }
+        
+        const randomNumber = Math.floor(Math.random() * 700) + 1;
+        const question = await Question.findOne({id: randomNumber})
+
+        await sendRandomQuestion(ctx, question)
+      } catch (error) {
+        console.log(error.message)
+      }
+      break;
     default:
       break;
   }

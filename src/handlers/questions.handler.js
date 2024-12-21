@@ -27,11 +27,14 @@ export const sendQuestion = async (ctx, question) => {
       }
   
       await ctx.reply(`Barcha savollar tugadi! 🎉\n`);
-      return await ctx.reply(
+      await ctx.reply(
           `Test davomiyligi ⏰: ${formattedTime || 0}\n` +
-          `To'g'ri javoblar ✅: ${ctx.session.correctAnswers}\n` +
-          `Noto'g'ri javoblar ❌: ${ctx.session.incorrectAnswers}`
+          `To'g'ri javoblar ✅: ${ctx.session.correctAnswers || 0}\n` +
+          `Noto'g'ri javoblar ❌: ${ctx.session.incorrectAnswers || 0}`
       );
+      ctx.session.correctAnswers = 0;
+      ctx.session.incorrectAnswers = 0
+      return
   }
   
     let choiseCount = 1;
@@ -62,3 +65,66 @@ export const sendQuestion = async (ctx, question) => {
   }
 }
 
+
+
+export const sendRandomQuestion = async (ctx, question) => {
+  try {
+    if (!question) {
+      let formattedTime;
+      let elapsedTime
+      if(ctx.session.startTime){
+        elapsedTime = Math.floor((Date.now() - ctx.session.startTime) / 1000);
+        ctx.session.startTime = null;
+    
+        if (elapsedTime >= 3600) {
+            const hours = Math.floor(elapsedTime / 3600);
+            const minutes = Math.floor((elapsedTime % 3600) / 60);
+            const seconds = elapsedTime % 60;
+            formattedTime = `${hours} soat ${minutes} minut ${seconds} sekund`;
+        } else if (elapsedTime >= 60) {
+            const minutes = Math.floor(elapsedTime / 60);
+            const seconds = elapsedTime % 60;
+            formattedTime = `${minutes} minut ${seconds} sekund`;
+        } else {
+            formattedTime = `${elapsedTime} sekund`;
+        }
+      }
+  
+      await ctx.reply(`Barcha savollar tugadi! 🎉\n`);
+      await ctx.reply(
+          `Test davomiyligi ⏰: ${formattedTime || 0}\n` +
+          `To'g'ri javoblar ✅: ${ctx.session.correctAnswers || 0}\n` +
+          `Noto'g'ri javoblar ❌: ${ctx.session.incorrectAnswers || 0}`
+      );
+      ctx.session.correctAnswers = 0;
+      ctx.session.incorrectAnswers = 0
+      return
+  }
+  
+    let choiseCount = 1;
+    let message = '';
+    const keyboard = new InlineKeyboard();
+  
+    for (let choice of question.choices) {
+      message += `${choiseCount}) ${choice.text}\n\n`;
+      keyboard.text(`${choiseCount}`, `random=${question.id}=${choiseCount - 1}`);
+      choiseCount++;
+    }
+  
+    const finalMessage = `${question.id} - savol ❓\n` + question.question + '\n\n' + message
+  
+    if (question.media.exist) {
+      const imageUrl = process.env.IMAGES_LINK + `${question.media.name}.png`;
+      return await ctx.replyWithPhoto(imageUrl, {
+        caption: finalMessage,
+        reply_markup: keyboard,
+      });
+    }
+  
+    return await ctx.reply(finalMessage, {
+      reply_markup: keyboard,
+    })
+  } catch (error) {
+    console.log(error.message)
+  }
+}
