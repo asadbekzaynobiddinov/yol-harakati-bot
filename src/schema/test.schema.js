@@ -1,13 +1,13 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const choiceSchema = new mongoose.Schema({
   text: { type: String, required: true },
-  answer: { type: Boolean, required: true }
+  answer: { type: Boolean, required: true },
 });
 
 const mediaSchema = new mongoose.Schema({
   exist: { type: Boolean, required: true },
-  name: { type: String, required: false }
+  name: { type: String, required: false },
 });
 
 const questionSchema = new mongoose.Schema({
@@ -15,7 +15,9 @@ const questionSchema = new mongoose.Schema({
   question: { type: String, required: true },
   choices: { type: [choiceSchema], required: true },
   media: { type: mediaSchema, required: false },
-  description: { type: String, required: false }
+  description: { type: String, required: false },
 });
 
-export const Question = mongoose.model('test', questionSchema);
+export const getModel = (lang) => {
+  return mongoose.model(`savollar_${lang}`, questionSchema);
+};

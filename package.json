@@ -5,8 +5,9 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start:dev": "node --watch server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start:dev": "node --watch index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write ."
   },
   "keywords": [],
   "author": "",
@@ -16,5 +17,8 @@
     "grammy": "^1.33.0",
     "mongodb": "^6.12.0",
     "mongoose": "^8.9.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.4.2"
   }
 }
