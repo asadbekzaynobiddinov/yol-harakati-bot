@@ -3,8 +3,7 @@ import { User } from "../schema/users.schema.js";
 import {
   sendTicktetsQuestion,
   sendRandomQuestion,
-  sendTenQuestion,
-  sendTwentyQuestion,
+  sndLimitedQuestions
 } from "./send.tests.js";
 
 export const pollCommand = async (ctx) => {
@@ -29,7 +28,7 @@ export const pollCommand = async (ctx) => {
         .skip(skip10)
         .limit(1)
         .toArray();
-      sendTenQuestion(ctx, question10);
+      sndLimitedQuestions(ctx, question10, 10);
       break;
     case "20test":
       const skip20 = Math.floor(Math.random() * 700);
@@ -39,7 +38,7 @@ export const pollCommand = async (ctx) => {
         .skip(skip20)
         .limit(1)
         .toArray();
-      sendTwentyQuestion(ctx, question20);
+      sndLimitedQuestions(ctx, question20, 20);
       break;
     case "random":
       const randomSkip = Math.floor(Math.random() * 700);
