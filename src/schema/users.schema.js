@@ -6,6 +6,8 @@ const usersSchema = new mongoose.Schema({
   last_name: String,
   username: String,
   lang: String,
+  currentTicketId: Number,
+  currentQuestionId: { type: Number, default: 0 },
 });
 
 export const User = mongoose.model("user", usersSchema);

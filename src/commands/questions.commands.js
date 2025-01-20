@@ -1,5 +1,3 @@
-import { getModel } from "../schema/test.schema.js";
-
 export const test10 = async (ctx) => {
   if (
     ctx.session.lastMessage &&
@@ -27,7 +25,6 @@ export const test20 = async (ctx) => {
     return;
   }
 };
-
 
 export const randomTest = async (ctx) => {
   if (

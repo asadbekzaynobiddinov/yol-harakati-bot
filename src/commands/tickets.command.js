@@ -1,13 +1,12 @@
 import { InlineKeyboard } from "grammy";
 import { User } from "../schema/users.schema.js";
-import { getModel } from "../schema/test.schema.js";
+import mongoose from "mongoose";
 
 export const ticketsCommand = async (ctx) => {
-  const currentUser = await User.findOne({ id: ctx.from.id });
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
-      ctx.update.callback_query.message.message_id
+    ctx.update.callback_query.message.message_id
   ) {
     await ctx.api.deleteMessage(
       ctx.from.id,
@@ -15,6 +14,10 @@ export const ticketsCommand = async (ctx) => {
     );
     return;
   }
+  
+  const currentUser = await User.findOne({ id: ctx.from.id });
+  await User.updateOne({ id: ctx.from.id }, { currentQuestionId: 0 })
+
   const message = {
     uz: `Bilet raqamlaridan tanlasangiz bo'ladi:`,
     kr: `Билет номерларидан танласангиз бўлади:`,
@@ -56,7 +59,7 @@ export const ticketsCommand = async (ctx) => {
 }
 
 export const prevCommand = async (ctx) => {
-  const currentUser = await User.findOne({ id: ctx.from.id });
+
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
@@ -68,6 +71,8 @@ export const prevCommand = async (ctx) => {
     );
     return;
   }
+
+  const currentUser = await User.findOne({ id: ctx.from.id });
 
   const message = {
     uz: `Siz ro'yxatning boshidasiz.`,
@@ -81,13 +86,15 @@ export const prevCommand = async (ctx) => {
       show_alert: true,
     })
   }
+  
   ctx.session.page = Math.max(1, (ctx.session.page || 1) - 1);
+  
+  await User.updateOne({ id: ctx.from.id }, { page: ctx.session.page })
+
   ticketsCommand(ctx)
 };
 
 export const nextCommand = async (ctx) => {
-
-  const currentUser = await User.findOne({ id: ctx.from.id });
 
   if (
     ctx.session.lastMessage &&
@@ -100,6 +107,8 @@ export const nextCommand = async (ctx) => {
     );
     return;
   }
+
+  const currentUser = await User.findOne({ id: ctx.from.id });
 
   const message = {
     uz: `Siz ro'yxatning oxiridasiz`,
@@ -119,8 +128,6 @@ export const nextCommand = async (ctx) => {
 
 export const backCommand = async (ctx) => {
 
-  const currentUser = await User.findOne({ id: ctx.from.id });
-
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
@@ -132,6 +139,8 @@ export const backCommand = async (ctx) => {
     );
     return;
   }
+
+  const currentUser = await User.findOne({ id: ctx.from.id });
 
   const message = {
     uz: `Kerakli bo'limni tanlang:`,
@@ -172,5 +181,111 @@ export const backCommand = async (ctx) => {
     message[currentUser.lang], {
     reply_markup: buttons[currentUser.lang],
   })
+  return;
+}
+
+
+export const ticketsButton = async (ctx) => {
+  if (
+    ctx.session.lastMessage &&
+    ctx.session.lastMessage.message_id !=
+      ctx.update.callback_query.message.message_id
+  ) {
+    await ctx.api.deleteMessage(
+      ctx.from.id,
+      ctx.update.callback_query.message.message_id
+    );
+    return;
+  }
+
+  const currentUser = await User.findOne({ id: ctx.from.id });
+  const [, ticket] = ctx.update.callback_query.data.split("=");
+
+  const skip = (+ticket - 1) * 10;
+
+  const [question] = await mongoose.connection.db.collection(`savollar_${currentUser.lang}`).find().skip(skip).limit(1).toArray();
+
+  const questionLang = {
+    uz: 'Savol',
+    kr: 'Савол',
+    ru: 'Вопрос'
+  }
+
+  const startQuizMessage = {
+    uz: 'Test boshlandi.',
+    kr: 'Тест бошланди.',
+    ru: 'Вопросы начались.',
+  }
+
+  const questionText = `[${currentUser.currentQuestionId + 1} / 10] - ${questionLang[currentUser.lang]}\n` + question.question;
+  const answers = question.choices.map((choice) => choice.text);
+  const correctAnswerId = question.choices.findIndex((choice) => choice.answer === true);
+
+  const lt300 = questionText.length <= 300;
+  const lt100 = answers.every((answer) => answer.length <= 100);
+
+  await ctx.api.editMessageText(ctx.from.id, ctx.update.callback_query.message.message_id, startQuizMessage[currentUser.lang])
+
+  if (lt300 && lt100) {
+
+    if(question.media.exist){
+      await ctx.api.sendPhoto(ctx.from.id, process.env.IMAGE_URL + `${question.media.name}.png`)
+    }
+  
+    await ctx.api.sendPoll(
+      ctx.from.id,
+      questionText,
+      answers,
+      {
+        type: 'quiz',
+        correct_option_id: correctAnswerId,
+        is_anonymous: false,
+      }
+    )
+    await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket })
+    return;
+  }
+
+  const message = `${questionText}\n\n${answers.map((answer, index) => `${index + 1}. ${answer}`).join("\n\n")}`;
+  
+  const choiseMessage = {
+    uz: 'Birini tanlang: ',
+    kr: 'Бирини танланг: ',
+    ru: 'Выберите один: ',
+  }
+
+  const fixedAnswers = answers.map((answer, index) => `${index + 1}.`)
+
+  if(question.media.exist){
+    await ctx.api.sendPhoto(ctx.from.id, process.env.IMAGE_URL + `${question.media.name}.png`, {
+      caption: message
+    })
+    await ctx.api.sendPoll(
+      ctx.from.id,
+      choiseMessage[currentUser.lang],
+      fixedAnswers,
+      {
+        type: 'quiz',
+        correct_option_id: correctAnswerId,
+        is_anonymous: false,
+        open_period: 60,
+      }
+    )
+    await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket})
+    return;
+  }
+  await ctx.api.sendMessage(ctx.from.id, message)
+  await ctx.api.sendPoll(
+    ctx.from.id,
+    choiseMessage[currentUser.lang],
+    fixedAnswers,
+    {
+      type: 'quiz',
+      correct_option_id: correctAnswerId,
+      is_anonymous: false,
+      open_period: 60,
+    }
+  )
+  await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket })
   return;
 }

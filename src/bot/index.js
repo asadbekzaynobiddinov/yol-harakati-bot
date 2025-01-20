@@ -1,9 +1,19 @@
 import { Bot, session } from "grammy";
 import { config } from "dotenv";
-import { startCommand } from "../commands/index.js";
-import { setLanguage, changeLanguage} from "../commands/language.commands.js";
-import { backCommand, nextCommand, prevCommand, ticketsCommand } from "../commands/tickets.command.js";
-import { randomTest, test10, test20 } from "../commands/questions.commands.js";
+import {
+  startCommand,
+  setLanguage,
+  changeLanguage,
+  backCommand,
+  nextCommand,
+  prevCommand,
+  ticketsButton,
+  ticketsCommand,
+  randomTest,
+  test10,
+  test20,
+  pollCommand,
+} from '../commands/index.js';
 
 config();
 
@@ -13,8 +23,8 @@ bot.use(
   session({
     initial: () => ({
       page: 1,
-      startTime: null,
-      lastMessage: null
+      lastMessage: null,
+      currentQuestionId: 0,
     }),
   })
 );
@@ -59,8 +69,23 @@ bot.on("callback_query:data", (ctx) => {
     case 'back':
       backCommand(ctx);
       break;
+    case 'ticket':
+      ticketsButton(ctx);
+      break;
     default:
       break;
+  }
+});
+
+bot.on("poll_answer", (ctx) => {
+  pollCommand(ctx)
+});
+
+bot.on("poll", async (ctx) => {
+  const poll = ctx.poll;
+  if (poll.is_closed) {
+      const correctOption = poll.correct_option_id;
+      await ctx.api.sendMessage(poll.chat_id, `Quiz tugadi! To'g'ri javob: ${poll.options[correctOption].text}`);
   }
 });
 
