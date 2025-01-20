@@ -14,7 +14,7 @@ export const ticketsCommand = async (ctx) => {
     );
     return;
   }
-  
+
   const currentUser = await User.findOne({ id: ctx.from.id });
   await User.updateOne({ id: ctx.from.id }, { currentQuestionId: 0 })
 
@@ -63,7 +63,7 @@ export const prevCommand = async (ctx) => {
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
-      ctx.update.callback_query.message.message_id
+    ctx.update.callback_query.message.message_id
   ) {
     await ctx.api.deleteMessage(
       ctx.from.id,
@@ -77,7 +77,7 @@ export const prevCommand = async (ctx) => {
   const message = {
     uz: `Siz ro'yxatning boshidasiz.`,
     kr: `Сиз рўйхатнинг бошидасиз.`,
-    ru: `Вы находитесь в начале списка.`, 
+    ru: `Вы находитесь в начале списка.`,
   }
 
   if (ctx.session.page == 1) {
@@ -86,9 +86,9 @@ export const prevCommand = async (ctx) => {
       show_alert: true,
     })
   }
-  
+
   ctx.session.page = Math.max(1, (ctx.session.page || 1) - 1);
-  
+
   await User.updateOne({ id: ctx.from.id }, { page: ctx.session.page })
 
   ticketsCommand(ctx)
@@ -99,7 +99,7 @@ export const nextCommand = async (ctx) => {
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
-      ctx.update.callback_query.message.message_id
+    ctx.update.callback_query.message.message_id
   ) {
     await ctx.api.deleteMessage(
       ctx.from.id,
@@ -115,7 +115,7 @@ export const nextCommand = async (ctx) => {
     kr: `Сиз рўйхатнинг охиридасиз`,
     ru: `Вы находитесь в конце списка`,
   }
-  
+
   if (ctx.session.page == 7) {
     return ctx.answerCallbackQuery({
       text: message[currentUser.lang],
@@ -131,7 +131,7 @@ export const backCommand = async (ctx) => {
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
-      ctx.update.callback_query.message.message_id
+    ctx.update.callback_query.message.message_id
   ) {
     await ctx.api.deleteMessage(
       ctx.from.id,
@@ -184,12 +184,11 @@ export const backCommand = async (ctx) => {
   return;
 }
 
-
 export const ticketsButton = async (ctx) => {
   if (
     ctx.session.lastMessage &&
     ctx.session.lastMessage.message_id !=
-      ctx.update.callback_query.message.message_id
+    ctx.update.callback_query.message.message_id
   ) {
     await ctx.api.deleteMessage(
       ctx.from.id,
@@ -228,10 +227,10 @@ export const ticketsButton = async (ctx) => {
 
   if (lt300 && lt100) {
 
-    if(question.media.exist){
+    if (question.media.exist) {
       await ctx.api.sendPhoto(ctx.from.id, process.env.IMAGE_URL + `${question.media.name}.png`)
     }
-  
+
     await ctx.api.sendPoll(
       ctx.from.id,
       questionText,
@@ -242,12 +241,12 @@ export const ticketsButton = async (ctx) => {
         is_anonymous: false,
       }
     )
-    await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket })
+    await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket, quizStatus: 'ticket' })
     return;
   }
 
   const message = `${questionText}\n\n${answers.map((answer, index) => `${index + 1}. ${answer}`).join("\n\n")}`;
-  
+
   const choiseMessage = {
     uz: 'Birini tanlang: ',
     kr: 'Бирини танланг: ',
@@ -256,7 +255,7 @@ export const ticketsButton = async (ctx) => {
 
   const fixedAnswers = answers.map((answer, index) => `${index + 1}.`)
 
-  if(question.media.exist){
+  if (question.media.exist) {
     await ctx.api.sendPhoto(ctx.from.id, process.env.IMAGE_URL + `${question.media.name}.png`, {
       caption: message
     })
@@ -268,10 +267,10 @@ export const ticketsButton = async (ctx) => {
         type: 'quiz',
         correct_option_id: correctAnswerId,
         is_anonymous: false,
-        open_period: 60,
+
       }
     )
-    await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket})
+    await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket, quizStatus: 'ticket' })
     return;
   }
   await ctx.api.sendMessage(ctx.from.id, message)
@@ -283,9 +282,9 @@ export const ticketsButton = async (ctx) => {
       type: 'quiz',
       correct_option_id: correctAnswerId,
       is_anonymous: false,
-      open_period: 60,
+
     }
   )
-  await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket })
+  await User.updateOne({ id: ctx.from.id }, { currentQuestionId: currentUser.currentQuestionId + 1, currentTicketId: ticket, quizStatus: 'ticket' })
   return;
 }
