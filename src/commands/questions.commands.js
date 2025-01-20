@@ -1,5 +1,7 @@
+import { InlineKeyboard } from "grammy";
 import mongoose from "mongoose";
 import { User } from "../schema/users.schema.js";
+import { checkUser } from "./check.js";
 
 export const test10 = async (ctx) => {
   if (
@@ -13,7 +15,38 @@ export const test10 = async (ctx) => {
     );
     return;
   }
+
   const currentUser = await User.findOne({ id: ctx.from.id });
+
+  const userMessage = {
+    uz: `Botdan to'liq foydalanish uchun avval kanalga a'zo bo'ling!`,
+    kr: `Ботдан тўлиқ фойдаланиш учун аввал каналга аъзо бўлинг!`,
+    ru: `Чтобы использовать бота полностью, сначала подпишитесь на канал!`,
+  };
+
+  const userButtons = {
+    uz: new InlineKeyboard()
+      .url(`Kanalga o'tish ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Obuna bo'ldim ✅`, "check"),
+    kr: new InlineKeyboard()
+      .url(`Каналга ўтиш ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Обуна бўлдим ✅`, "check"),
+    ru: new InlineKeyboard()
+      .url(`Перейти в канал ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Подписался ✅`, "check"),
+  };
+
+  const userStatus = await checkUser(ctx);
+
+  if (!userStatus) {
+    ctx.session.lastMessage = await ctx.reply(userMessage[currentUser.lang], {
+      reply_markup: userButtons[currentUser.lang],
+    });
+    return;
+  }
 
   const skip = Math.floor(Math.random() * 700);
 
@@ -146,7 +179,38 @@ export const test20 = async (ctx) => {
     );
     return;
   }
+
   const currentUser = await User.findOne({ id: ctx.from.id });
+
+  const userMessage = {
+    uz: `Botdan to'liq foydalanish uchun avval kanalga a'zo bo'ling!`,
+    kr: `Ботдан тўлиқ фойдаланиш учун аввал каналга аъзо бўлинг!`,
+    ru: `Чтобы использовать бота полностью, сначала подпишитесь на канал!`,
+  };
+
+  const userButtons = {
+    uz: new InlineKeyboard()
+      .url(`Kanalga o'tish ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Obuna bo'ldim ✅`, "check"),
+    kr: new InlineKeyboard()
+      .url(`Каналга ўтиш ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Обуна бўлдим ✅`, "check"),
+    ru: new InlineKeyboard()
+      .url(`Перейти в канал ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Подписался ✅`, "check"),
+  };
+
+  const userStatus = await checkUser(ctx);
+
+  if (!userStatus) {
+    ctx.session.lastMessage = await ctx.reply(userMessage[currentUser.lang], {
+      reply_markup: userButtons[currentUser.lang],
+    });
+    return;
+  }
 
   const skip = Math.floor(Math.random() * 700);
 
@@ -280,8 +344,38 @@ export const randomTest = async (ctx) => {
     return;
   }
 
-  const user = await User.findOne({ id: ctx.from.id });
+  const currentUser = await User.findOne({ id: ctx.from.id });
   await User.updateOne({ id: ctx.from.id }, { quizStatus: "random" });
+
+  const userMessage = {
+    uz: `Botdan to'liq foydalanish uchun avval kanalga a'zo bo'ling!`,
+    kr: `Ботдан тўлиқ фойдаланиш учун аввал каналга аъзо бўлинг!`,
+    ru: `Чтобы использовать бота полностью, сначала подпишитесь на канал!`,
+  };
+
+  const userButtons = {
+    uz: new InlineKeyboard()
+      .url(`Kanalga o'tish ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Obuna bo'ldim ✅`, "check"),
+    kr: new InlineKeyboard()
+      .url(`Каналга ўтиш ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Обуна бўлдим ✅`, "check"),
+    ru: new InlineKeyboard()
+      .url(`Перейти в канал ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Подписался ✅`, "check"),
+  };
+
+  const userStatus = await checkUser(ctx);
+
+  if (!userStatus) {
+    ctx.session.lastMessage = await ctx.reply(userMessage[currentUser.lang], {
+      reply_markup: userButtons[currentUser.lang],
+    });
+    return;
+  }
 
   const questionLang = {
     uz: "Savol",
@@ -298,17 +392,18 @@ export const randomTest = async (ctx) => {
   await ctx.api.editMessageText(
     ctx.from.id,
     ctx.update.callback_query.message.message_id,
-    startQuizMessage[user.lang]
+    startQuizMessage[currentUser.lang]
   );
   const randomSkip = Math.floor(Math.random() * 700);
   const [question] = await mongoose.connection.db
-    .collection(`savollar_${user.lang}`)
+    .collection(`savollar_${currentUser.lang}`)
     .find()
     .skip(randomSkip)
     .limit(1)
     .toArray();
   const questionText =
-    `[${question.id}] - ${questionLang[user.lang]}\n` + question.question;
+    `[${question.id}] - ${questionLang[currentUser.lang]}\n` +
+    question.question;
   const answers = question.choices.map((choice) => choice.text);
   const correctAnswerId = question.choices.findIndex(
     (choice) => choice.answer === true
@@ -353,7 +448,7 @@ export const randomTest = async (ctx) => {
 
     await ctx.api.sendPoll(
       ctx.from.id,
-      choiseMessage[user.lang],
+      choiseMessage[currentUser.lang],
       fixedAnswers,
       {
         type: "quiz",
@@ -366,10 +461,15 @@ export const randomTest = async (ctx) => {
 
   await ctx.api.sendMessage(ctx.from.id, message);
 
-  await ctx.api.sendPoll(ctx.from.id, choiseMessage[user.lang], fixedAnswers, {
-    type: "quiz",
-    correct_option_id: correctAnswerId,
-    is_anonymous: false,
-  });
+  await ctx.api.sendPoll(
+    ctx.from.id,
+    choiseMessage[currentUser.lang],
+    fixedAnswers,
+    {
+      type: "quiz",
+      correct_option_id: correctAnswerId,
+      is_anonymous: false,
+    }
+  );
   return;
 };

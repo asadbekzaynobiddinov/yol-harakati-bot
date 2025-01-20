@@ -14,6 +14,7 @@ import {
   test20,
   pollCommand,
 } from "../commands/index.js";
+import { User } from "../schema/users.schema.js";
 
 config();
 
@@ -33,8 +34,16 @@ bot.command("start", (ctx) => {
   startCommand(ctx);
 });
 
-bot.on("callback_query:data", (ctx) => {
+bot.on("callback_query:data", async (ctx) => {
   const [command] = ctx.callbackQuery.data.split("=");
+  const user = await User.findOne({ id: ctx.from.id });
+
+  const message = {
+    uz: `Siz hali a'zo bo'lmadingiz`,
+    kr: `Сиз ҳали аъзо бўлмагансиз`,
+    ru: `Вы еще не подписались`,
+  };
+
   switch (command) {
     case "uz":
       setLanguage(ctx, "uz");
@@ -72,6 +81,17 @@ bot.on("callback_query:data", (ctx) => {
     case "ticket":
       ticketsButton(ctx);
       break;
+    case "check":
+      const member = await ctx.api.getChatMember("@fulstack_dev", ctx.from.id);
+      if (member.status == "left") {
+        ctx.api.answerCallbackQuery(ctx.callbackQuery.id, {
+          text: message[user.lang],
+          show_alert: true,
+        });
+      } else {
+        startCommand(ctx)
+      }
+      break;
     default:
       break;
   }
@@ -79,17 +99,6 @@ bot.on("callback_query:data", (ctx) => {
 
 bot.on("poll_answer", (ctx) => {
   pollCommand(ctx);
-});
-
-bot.on("poll", async (ctx) => {
-  const poll = ctx.poll;
-  if (poll.is_closed) {
-    const correctOption = poll.correct_option_id;
-    await ctx.api.sendMessage(
-      poll.chat_id,
-      `Quiz tugadi! To'g'ri javob: ${poll.options[correctOption].text}`
-    );
-  }
 });
 
 export default bot;

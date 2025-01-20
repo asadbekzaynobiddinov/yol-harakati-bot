@@ -1,5 +1,6 @@
 import { InlineKeyboard } from "grammy";
 import { User } from "../schema/users.schema.js";
+import { checkUser } from "./check.js";
 
 export const startCommand = async (ctx) => {
   const currentUser = await User.findOne({ id: ctx.from.id });
@@ -20,6 +21,36 @@ export const startCommand = async (ctx) => {
           [{ text: "🇷🇺 Русский", callback_data: "ru" }],
         ],
       },
+    });
+    return;
+  }
+
+  const userMessage = {
+    uz: `Botdan to'liq foydalanish uchun avval kanalga a'zo bo'ling!`,
+    kr: `Ботдан тўлиқ фойдаланиш учун аввал каналга аъзо бўлинг!`,
+    ru: `Чтобы использовать бота полностью, сначала подпишитесь на канал!`,
+  };
+
+  const userButtons = {
+    uz: new InlineKeyboard()
+      .url(`Kanalga o'tish ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Obuna bo'ldim ✅`, "check"),
+    kr: new InlineKeyboard()
+      .url(`Каналга ўтиш ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Обуна бўлдим ✅`, "check"),
+    ru: new InlineKeyboard()
+      .url(`Перейти в канал ➡️`, "t.me/+rdEyAn6RqTNlY2Fi")
+      .row()
+      .text(`Подписался ✅`, "check"),
+  };
+
+  const userStatus = await checkUser(ctx);
+
+  if (!userStatus) {
+    ctx.session.lastMessage = await ctx.reply(userMessage[currentUser.lang], {
+      reply_markup: userButtons[currentUser.lang],
     });
     return;
   }

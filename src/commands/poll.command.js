@@ -3,7 +3,7 @@ import { User } from "../schema/users.schema.js";
 import {
   sendTicktetsQuestion,
   sendRandomQuestion,
-  sndLimitedQuestions
+  sndLimitedQuestions,
 } from "./send.tests.js";
 
 export const pollCommand = async (ctx) => {

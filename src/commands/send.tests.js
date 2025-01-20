@@ -9,17 +9,16 @@ export const sendTicktetsQuestion = async (ctx, question) => {
       uz: "Tabriklayman barhca savollar tugadi! 🎉\nQayta boshlash: /start",
       kr: "Табриклайман, барча саволлар тугади! 🎉\nҚайта бошлаш: /start",
       ru: "Поздравляю, все вопросы завершены! 🎉\nПерезапустить: /start",
-    };    
+    };
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
       { currentQuestionId: 0 }
     );
-    
+
     return ctx.api.sendMessage(
       ctx.update.poll_answer.user.id,
       message[user.lang]
     );
-    
   }
 
   const questionLang = {
@@ -212,7 +211,7 @@ export const sndLimitedQuestions = async (ctx, question, limit) => {
       uz: "Tabriklayman barhca savollar tugadi! 🎉\nQayta boshlash: /start",
       kr: "Табриклайман, барча саволлар тугади! 🎉\nҚайта бошлаш: /start",
       ru: "Поздравляю, все вопросы завершены! 🎉\nПерезапустить: /start",
-    };    
+    };
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
       { currentQuestionId: 0 }
@@ -317,4 +316,4 @@ export const sndLimitedQuestions = async (ctx, question, limit) => {
     { currentQuestionId: user.currentQuestionId + 1 }
   );
   return;
-}
+};
