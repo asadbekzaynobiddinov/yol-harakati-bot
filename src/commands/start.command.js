@@ -2,7 +2,6 @@ import { InlineKeyboard } from "grammy";
 import { User } from "../schema/users.schema.js";
 
 export const startCommand = async (ctx) => {
-
   const currentUser = await User.findOne({ id: ctx.from.id });
 
   if (!currentUser) {
@@ -67,7 +66,7 @@ export const startCommand = async (ctx) => {
         reply_markup: buttons[currentUser.lang],
       }
     );
-    return
+    return;
   }
 
   ctx.session.lastMessage = await ctx.reply(message[currentUser.lang], {

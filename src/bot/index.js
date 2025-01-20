@@ -13,7 +13,7 @@ import {
   test10,
   test20,
   pollCommand,
-} from '../commands/index.js';
+} from "../commands/index.js";
 
 config();
 
@@ -36,40 +36,40 @@ bot.command("start", (ctx) => {
 bot.on("callback_query:data", (ctx) => {
   const [command] = ctx.callbackQuery.data.split("=");
   switch (command) {
-    case 'uz':
-      setLanguage(ctx, 'uz');   
+    case "uz":
+      setLanguage(ctx, "uz");
       break;
-    case 'kr':
-      setLanguage(ctx, 'kr');
+    case "kr":
+      setLanguage(ctx, "kr");
       break;
-    case 'ru':
-      setLanguage(ctx, 'ru');
+    case "ru":
+      setLanguage(ctx, "ru");
       break;
-    case 'tickets':
+    case "tickets":
       ticketsCommand(ctx);
       break;
-    case 'random':
+    case "random":
       randomTest(ctx);
       break;
-    case 'changeLang':
+    case "changeLang":
       changeLanguage(ctx);
       break;
-    case 'questions10':
+    case "questions10":
       test10(ctx);
-      break
-    case 'questions20':
+      break;
+    case "questions20":
       test20(ctx);
       break;
-    case 'prev':
+    case "prev":
       prevCommand(ctx);
       break;
-    case 'next':
+    case "next":
       nextCommand(ctx);
       break;
-    case 'back':
+    case "back":
       backCommand(ctx);
       break;
-    case 'ticket':
+    case "ticket":
       ticketsButton(ctx);
       break;
     default:
@@ -78,14 +78,17 @@ bot.on("callback_query:data", (ctx) => {
 });
 
 bot.on("poll_answer", (ctx) => {
-  pollCommand(ctx)
+  pollCommand(ctx);
 });
 
 bot.on("poll", async (ctx) => {
   const poll = ctx.poll;
   if (poll.is_closed) {
-      const correctOption = poll.correct_option_id;
-      await ctx.api.sendMessage(poll.chat_id, `Quiz tugadi! To'g'ri javob: ${poll.options[correctOption].text}`);
+    const correctOption = poll.correct_option_id;
+    await ctx.api.sendMessage(
+      poll.chat_id,
+      `Quiz tugadi! To'g'ri javob: ${poll.options[correctOption].text}`
+    );
   }
 });
 
