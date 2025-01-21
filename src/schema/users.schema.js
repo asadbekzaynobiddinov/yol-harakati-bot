@@ -8,6 +8,7 @@ const usersSchema = new mongoose.Schema({
   lang: String,
   currentTicketId: Number,
   quizStatus: String,
+  inQuiz: { type: Boolean, default: false },
   currentQuestionId: { type: Number, default: 0 },
 });
 

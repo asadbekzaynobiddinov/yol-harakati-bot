@@ -30,7 +30,25 @@ bot.use(
   })
 );
 
+bot.api.setMyCommands([
+  { command: "start", description: "Botni ishga tushirish" },
+  { command: "stop", description: "Savollarni tugatish" },
+]);
+
 bot.command("start", (ctx) => {
+  startCommand(ctx);
+});
+
+bot.command("stop", async (ctx) => {
+  await User.updateOne(
+    { id: ctx.from.id },
+    {
+      currentQuestionId: 0,
+      currentTicketId: 0,
+      inQuiz: false,
+      quizStatus: "",
+    }
+  );
   startCommand(ctx);
 });
 
@@ -89,7 +107,7 @@ bot.on("callback_query:data", async (ctx) => {
           show_alert: true,
         });
       } else {
-        startCommand(ctx)
+        startCommand(ctx);
       }
       break;
     default:

@@ -12,7 +12,7 @@ export const sendTicktetsQuestion = async (ctx, question) => {
     };
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
-      { currentQuestionId: 0 }
+      { currentQuestionId: 0, inQuiz: false }
     );
 
     return ctx.api.sendMessage(
@@ -58,7 +58,7 @@ export const sendTicktetsQuestion = async (ctx, question) => {
     );
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
-      { currentQuestionId: user.currentQuestionId + 1 }
+      { currentQuestionId: user.currentQuestionId + 1, inQuiz: true }
     );
     return;
   }
@@ -93,7 +93,7 @@ export const sendTicktetsQuestion = async (ctx, question) => {
     );
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
-      { currentQuestionId: user.currentQuestionId + 1 }
+      { currentQuestionId: user.currentQuestionId + 1, inQuiz: true }
     );
     return;
   }
@@ -112,7 +112,7 @@ export const sendTicktetsQuestion = async (ctx, question) => {
   );
   await User.updateOne(
     { id: ctx.update.poll_answer.user.id },
-    { currentQuestionId: user.currentQuestionId + 1 }
+    { currentQuestionId: user.currentQuestionId + 1, inQuiz: true }
   );
   return;
 };
@@ -214,7 +214,7 @@ export const sndLimitedQuestions = async (ctx, question, limit) => {
     };
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
-      { currentQuestionId: 0 }
+      { currentQuestionId: 0, inQuiz: false }
     );
     return ctx.api.sendMessage(
       ctx.update.poll_answer.user.id,
@@ -259,7 +259,7 @@ export const sndLimitedQuestions = async (ctx, question, limit) => {
     );
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
-      { currentQuestionId: user.currentQuestionId + 1 }
+      { currentQuestionId: user.currentQuestionId + 1, inQuiz: true }
     );
     return;
   }
@@ -294,7 +294,7 @@ export const sndLimitedQuestions = async (ctx, question, limit) => {
     );
     await User.updateOne(
       { id: ctx.update.poll_answer.user.id },
-      { currentQuestionId: user.currentQuestionId + 1 }
+      { currentQuestionId: user.currentQuestionId + 1, inQuiz: true }
     );
     return;
   }
@@ -313,7 +313,7 @@ export const sndLimitedQuestions = async (ctx, question, limit) => {
   );
   await User.updateOne(
     { id: ctx.update.poll_answer.user.id },
-    { currentQuestionId: user.currentQuestionId + 1 }
+    { currentQuestionId: user.currentQuestionId + 1, inQuiz: true }
   );
   return;
 };

@@ -18,6 +18,20 @@ export const ticketsCommand = async (ctx) => {
 
   const currentUser = await User.findOne({ id: ctx.from.id });
 
+  const statusMessage = {
+    uz: `Avval mavjud testni tugating\nYoki "stop" buyrug'ini bering`,
+    kr: `Аввал мавжуд тестни тугатинг\nЁки "stop" буйруғини беринг`,
+    ru: `Сначала завершите текущий тест\nИли отправьте команду "stop"`,
+  };
+
+  if (currentUser.inQuiz) {
+    ctx.api.answerCallbackQuery(ctx.callbackQuery.id, {
+      text: statusMessage[currentUser.lang],
+      show_alert: true,
+    });
+    return;
+  }
+
   const userMessage = {
     uz: `Botdan to'liq foydalanish uchun avval kanalga a'zo bo'ling!`,
     kr: `Ботдан тўлиқ фойдаланиш учун аввал каналга аъзо бўлинг!`,
@@ -289,6 +303,7 @@ export const ticketsButton = async (ctx) => {
         currentQuestionId: currentUser.currentQuestionId + 1,
         currentTicketId: ticket,
         quizStatus: "ticket",
+        inQuiz: true,
       }
     );
     return;
@@ -328,6 +343,7 @@ export const ticketsButton = async (ctx) => {
         currentQuestionId: currentUser.currentQuestionId + 1,
         currentTicketId: ticket,
         quizStatus: "ticket",
+        inQuiz: true,
       }
     );
     return;
@@ -349,6 +365,7 @@ export const ticketsButton = async (ctx) => {
       currentQuestionId: currentUser.currentQuestionId + 1,
       currentTicketId: ticket,
       quizStatus: "ticket",
+      inQuiz: true,
     }
   );
   return;
