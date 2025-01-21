@@ -5,8 +5,8 @@ config();
 
 export const connectDb = async () => {
   try {
-    mongoose.connect(process.env.MONGO_URL);
-    console.log("MongoDB successfully connected");
+    await mongoose.connect(process.env.MONGO_URL);
+    console.log('MongoDb successfuly connected');
   } catch (error) {
     console.log(error.message);
   }
